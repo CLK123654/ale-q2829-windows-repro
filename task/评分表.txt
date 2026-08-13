@@ -1,0 +1,85 @@
+总分100分
+
+1. 输入材料与顺序
+分值：12分
+优先级：Gate项
+所属层级：L3输入数据导入与完整性层
+标准答案：程序读取archetype_signatures.csv、window_fingerprints.csv和unmixing_contract.json；8个feature、4个component和6个window_id与合同顺序一致
+关键字段：feature_order、component_order、window_order及两张CSV表头
+容差：数值显示格式可以变化，顺序不能变化
+失败边界：缺少输入、表头错误、顺序重排、数值为负或非有限值时本项为0分
+可观察证据：完成版MATLAB程序、两张输入CSV和unmixing_contract.json
+客观硬性标准：8个特征、4个分量和6个窗口全部命中
+阈值：输入顺序错误数为0
+
+2. L1归一化
+分值：12分
+优先级：Gate项
+所属层级：L4数据清洗与质量控制层
+标准答案：四个原型列分别除以自身L1和，六个窗口向量分别除以自身L1和，所有分母大于0
+关键字段：archetype_signatures、window_fingerprints、归一化分母
+容差：归一化后向量和与1的绝对误差不超过0.000000001
+失败边界：跨列共用分母、窗口之间共用分母或零分母继续运行时本项为0分
+可观察证据：run_unmixing.m、archetype_signatures.csv和window_fingerprints.csv
+客观硬性标准：10个向量分别完成归一化
+阈值：向量和超差数为0
+
+3. 欧氏单纯形投影
+分值：16分
+优先级：Gate项
+所属层级：L6领域计算与专业规则层
+标准答案：project_simplex.m通过降序排序、累积和、rho与theta完成欧氏投影，输出权重非负且总和为1
+关键字段：rho、theta、projected_weights
+容差：权重和与1的绝对误差不超过0.000000001，单个权重不低于-0.000000000001
+失败边界：使用简单截断替代投影、负权重越界或权重和超差时本项为0分
+可观察证据：project_simplex.m、mixture_weights.csv和bootstrap_intervals.csv
+客观硬性标准：主估计和Bootstrap重拟合均使用同一投影约束
+阈值：违反单纯形约束的结果数为0
+
+4. 投影梯度与收敛
+分值：16分
+优先级：Gate项
+所属层级：L8运行验证与可执行行为层
+标准答案：fit_simplex.m从均匀权重开始，使用合同的step_size、max_iterations和tolerance_l2；convergence.csv覆盖W01至W06且converged均为true
+关键字段：window_id、iterations、converged、objective、residual_l2
+容差：objective和residual_l2绝对误差不超过0.000000001
+失败边界：初值、步长或停止条件不取自合同，任一窗口缺失或未收敛时本项为0分
+可观察证据：fit_simplex.m、unmixing_contract.json和convergence.csv
+客观硬性标准：6个窗口独立拟合并记录收敛状态
+阈值：未收敛窗口数为0
+
+5. 权重与完整排名
+分值：16分
+优先级：高权重项
+所属层级：L7产物结构与专业对象层
+标准答案：mixture_weights.csv包含6个窗口的4个分量权重、dominant_component、top2_margin和objective；component_rankings.csv包含24行完整排名
+关键字段：window_id、video、chat、sync、browse、dominant_component、top2_margin、rank、component、weight
+容差：权重、top2_margin和objective绝对误差不超过0.000000001
+失败边界：窗口缺失、分量重复、排名不按weight降序及component升序或top2_margin计算错误时本项为0分
+可观察证据：mixture_weights.csv和component_rankings.csv
+客观硬性标准：每个窗口四个分量各出现一次，名次覆盖1至4
+阈值：权重行数6，排名行数24，排序错误数为0
+
+6. 残差Bootstrap区间
+分值：18分
+优先级：高权重项
+所属层级：L6领域计算与专业规则层
+标准答案：每个窗口按合同seed_formula重置32位LCG，生成200组8坐标重采样索引；每个副本在拟合向量上叠加抽取残差，截到非负、L1归一后重新拟合
+关键字段：replicates_per_window、scheme、lcg、interval、window_id、component、estimate、ci_lower、ci_upper
+容差：estimate与主权重绝对误差不超过0.000000001，区间端点绝对误差不超过0.000000001
+失败边界：跨窗口共用随机状态、未完整重拟合、副本未归一化、区间上下界颠倒或任一窗口分量缺失时本项为0分
+可观察证据：lcg_indices.m、run_unmixing.m、unmixing_contract.json和bootstrap_intervals.csv
+客观硬性标准：6个窗口乘4个分量共24行区间，estimate与mixture_weights.csv一致
+阈值：区间行数24，上下界错误数为0
+
+7. 汇总与交付边界
+分值：10分
+优先级：普通项
+所属层级：L9跨产物一致性与可追溯层
+标准答案：交付run_unmixing.m、project_simplex.m、fit_simplex.m、lcg_indices.m、4张CSV、unmixing_summary.json和README.md；汇总包含contract_id、windows、components、bootstrap_replicates_per_window、dominant_sequence、low_margin_windows和all_converged
+关键字段：文件名、contract_id、windows、components、bootstrap_replicates_per_window、dominant_sequence、low_margin_windows、all_converged
+容差：JSON键序、缩进、CSV行序和MATLAB源码排版可以变化
+失败边界：缺少主程序、任一业务结果不可读、汇总与结果表矛盾或说明超出容量形态用途时本项为0分
+可观察证据：交付目录、四张CSV、汇总JSON和README.md
+客观硬性标准：10个固定业务交付文件存在并可打开
+阈值：交付命中率100%，跨文件数量差异为0

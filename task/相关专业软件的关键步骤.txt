@@ -1,0 +1,8 @@
+1.在MATLAB中读取unmixing_contract.json、archetype_signatures.csv和window_fingerprints.csv
+2.核对特征、分量、窗口顺序和非负有限数值
+3.对每个原型列与窗口观测分别做L1归一化
+4.用sort、cumsum、rho和theta实现欧氏单纯形投影
+5.从均匀初值运行合同规定的投影梯度，按相邻权重L2距离判断收敛
+6.按weight降序与component升序生成完整排名和top2_margin
+7.使用合同给定LCG生成重采样索引，按残差Bootstrap方案重拟合
+8.写出四张CSV和unmixing_summary.json，核对窗口、分量、区间和收敛状态
